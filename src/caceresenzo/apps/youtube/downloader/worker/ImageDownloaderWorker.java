@@ -12,6 +12,12 @@ import caceresenzo.libs.cryptography.MD5;
 import caceresenzo.libs.internationalization.i18n;
 import caceresenzo.libs.thread.queue.WorkQueue;
 
+/**
+ * Queued worker used to download and manage image cache (thumbnail for exemple)<br>
+ * Limited to one worker at a time
+ * 
+ * @author Enzo CACERES
+ */
 public class ImageDownloaderWorker {
 	
 	/* Constants */
@@ -29,9 +35,11 @@ public class ImageDownloaderWorker {
 	private static WorkQueue queue = new WorkQueue(1);
 	private static Object taskGroup = queue.registerTaskGroup(1);
 	
+	/* Variables */
 	private JLabel label;
 	private String url;
 	
+	/* Constructor */
 	public ImageDownloaderWorker(JLabel label, String url) {
 		this.label = label;
 		this.url = url;
@@ -39,6 +47,9 @@ public class ImageDownloaderWorker {
 		label.setText(i18n.string("worker.imagedownloader.eta.downloading"));
 	}
 	
+	/**
+	 * Start as soon as possible (Add to thread queue)
+	 */
 	public void queue() {
 		queue.add(taskGroup, new Runnable() {
 			public File cacheFile = new File(IMAGE_CACHE_FOLDER, MD5.silentMd5(url));

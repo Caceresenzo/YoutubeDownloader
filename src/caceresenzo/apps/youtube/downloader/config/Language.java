@@ -28,9 +28,17 @@ public class Language {
 		@Override
 		public void set() {
 			o("error.title", "Erreur");
+
+			o("ui.button.start", "Démarrer");
+			o("ui.button.download.selected", "Télécharger");
+			o("ui.button.download.all", "Tout télécharger");
+			o("ui.button.output.directory", "Dossier...");
 			
 			o("worker.imagedownloader.eta.downloading", "Téléchargement...");
 			o("worker.imagedownloader.eta.error", "Erreur");
+
+			o("worker.extractor.eta.waiting", "En attente");
+			o("worker.extractor.eta.error", "Erreur");
 		}
 		
 	}

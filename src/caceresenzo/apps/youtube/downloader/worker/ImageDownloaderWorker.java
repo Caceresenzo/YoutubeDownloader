@@ -70,6 +70,7 @@ public class ImageDownloaderWorker {
 				
 				try {
 					label.setIcon(new ImageIcon(ImageIO.read(cacheFile)));
+					label.setText("");
 				} catch (Exception exception) {
 					label.setText(i18n.string("worker.imagedownloader.eta.error"));
 					silentDelete();

@@ -38,6 +38,10 @@ public class Language {
 			o("worker.imagedownloader.eta.error", "Erreur");
 
 			o("worker.extractor.eta.waiting", "En attente");
+			o("worker.extractor.eta.working", "Travail en cours...");
+			o("worker.extractor.eta.working.count", "Travail en cours... (%s vidéo%s sur %s)");
+			o("worker.extractor.eta.error.common", "Erreur: %s");
+			o("worker.extractor.eta.error.bad-url", "Erreur dans l'url: %s");
 			o("worker.extractor.eta.error", "Erreur");
 		}
 		

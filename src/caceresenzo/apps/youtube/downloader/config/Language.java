@@ -28,21 +28,30 @@ public class Language {
 		@Override
 		public void set() {
 			o("error.title", "Erreur");
-
+			
 			o("ui.button.start", "Démarrer");
 			o("ui.button.download.selected", "Télécharger");
 			o("ui.button.download.all", "Tout télécharger");
+			o("ui.button.download.downloading", "En cours...");
+			o("ui.button.download.waiting", "En attente...");
+			o("ui.button.download.already", "Déja télécharger");
 			o("ui.button.output.directory", "Dossier...");
 			
 			o("worker.imagedownloader.eta.downloading", "Téléchargement...");
 			o("worker.imagedownloader.eta.error", "Erreur");
-
-			o("worker.extractor.eta.waiting", "En attente");
+			
+			o("worker.eta.waiting", "En attente");
 			o("worker.extractor.eta.working", "Travail en cours...");
 			o("worker.extractor.eta.working.count", "Travail en cours... (%s vidéo%s sur %s)");
 			o("worker.extractor.eta.error.common", "Erreur: %s");
 			o("worker.extractor.eta.error.bad-url", "Erreur dans l'url: %s");
-			o("worker.extractor.eta.error", "Erreur");
+			
+			// o("worker.downloader.eta.working", "Traitement de \"%s\"...");
+			o("worker.downloader.eta.extraction", "Extraction...");
+			o("worker.downloader.eta.download", "Téléchargement...");
+			o("worker.downloader.eta.conversion", "Conversion vers mp3...");
+			o("worker.downloader.eta.saving", "Enregistrement...");
+			o("worker.downloader.eta.error", "Erreur: %s");
 		}
 		
 	}

@@ -13,11 +13,13 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
 import caceresenzo.apps.youtube.downloader.config.Config;
+import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.worker.ImageDownloaderWorker;
 import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
 import caceresenzo.libs.cryptography.MD5;
 import caceresenzo.libs.filesystem.FileUtils;
 import caceresenzo.libs.internationalization.i18n;
+import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.string.StringUtils;
 import caceresenzo.libs.youtube.format.YoutubeFormat;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
@@ -35,7 +37,7 @@ public class VideoPanel extends JPanel {
 	private final File videoFile;
 	private final VideoDownloadWorker.WorkerCallback workerCallback;
 	
-	public VideoPanel(YoutubePlaylistItem youtubePlaylistItem) {
+	public VideoPanel(final YoutubePlaylistItem youtubePlaylistItem) {
 		this.youtubePlaylistItem = youtubePlaylistItem;
 		this.videoFile = new File(Config.PATH_DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(youtubePlaylistItem.getVideoMeta().getTitle()) + ".mp3");
 		this.workerCallback = new VideoDownloadWorker.WorkerCallback() {
@@ -47,6 +49,7 @@ public class VideoPanel extends JPanel {
 				itemProgressBar.setIndeterminate(true);
 				itemProgressBar.setValue(0);
 				
+				error = null;
 				buttonState(true);
 			}
 			
@@ -100,14 +103,13 @@ public class VideoPanel extends JPanel {
 			
 			@Override
 			public void onException(Exception exception, boolean critical) {
-				etaLabel.setText(i18n.string("worker.downloader.eta.error", StringUtils.cutIfTooLong(exception.getLocalizedMessage(), 150)));
 				itemProgressBar.setIndeterminate(false);
 				itemProgressBar.setValue(0);
 				
 				error = exception;
 				buttonState(false);
 				
-				exception.printStackTrace();
+				Logger.exception(exception, "Failed to extract/download/convert video: " + youtubePlaylistItem.getVideoMeta().getTitle());
 			}
 			
 			@Override
@@ -117,6 +119,10 @@ public class VideoPanel extends JPanel {
 				itemProgressBar.setValue(0);
 				
 				buttonState(false);
+				
+				if (error != null) {
+					VideoManager.getVideoManager().addFailedPanel(VideoPanel.this);
+				}
 			}
 			
 			private void buttonState(boolean working) {
@@ -127,12 +133,16 @@ public class VideoPanel extends JPanel {
 					etaLabel.setVisible(working);
 				} else {
 					etaLabel.setVisible(true);
-					etaLabel.setText(i18n.string("worker.downloader.eta.error", error.getLocalizedMessage()));
+					etaLabel.setText(i18n.string("worker.downloader.eta.error", StringUtils.cutIfTooLong(error.getLocalizedMessage(), 150)));
 				}
 				itemProgressBar.setVisible(working);
 				
 				if (!working) {
 					updateDownloadButton();
+					
+					if (VideoManager.getVideoManager().isInBatch()) {
+						downloadButton.setEnabled(false);
+					}
 				}
 			}
 		};
@@ -169,7 +179,7 @@ public class VideoPanel extends JPanel {
 		downloadButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				VideoDownloadWorker.fromVideoItem(youtubePlaylistItem).callback(workerCallback).start();
+				download().start();
 			}
 		});
 	}
@@ -191,6 +201,10 @@ public class VideoPanel extends JPanel {
 			downloadButton.setEnabled(false);
 			downloadButton.setText(i18n.string("ui.button.download.already"));
 		}
+	}
+	
+	public VideoDownloadWorker download() {
+		return VideoDownloadWorker.fromVideoItem(youtubePlaylistItem).callback(workerCallback);
 	}
 	
 	public JProgressBar getItemProgressBar() {

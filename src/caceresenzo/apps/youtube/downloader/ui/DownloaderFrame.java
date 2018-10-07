@@ -5,8 +5,8 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -25,11 +25,9 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 
 import caceresenzo.apps.youtube.downloader.config.Config;
-import caceresenzo.apps.youtube.downloader.config.Language;
+import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.worker.PlaylistExtractionWorker;
-import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
 import caceresenzo.libs.internationalization.i18n;
-import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.math.MathUtils;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylist;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
@@ -45,7 +43,6 @@ public class DownloaderFrame {
 	private JPanel listPanel;
 	private JPanel etaPanel;
 	private JButton outputDirectoryButton;
-	private JButton downloadButton;
 	private JButton downloadAllButton;
 	private JLabel etaLabel;
 	
@@ -111,13 +108,46 @@ public class DownloaderFrame {
 		
 		downloadAllButton = new JButton(i18n.string("ui.button.download.all"));
 		
-		downloadButton = new JButton(i18n.string("ui.button.download.selected"));
-		
 		etaPanel = new JPanel();
 		etaPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addGroup(gl_panel.createSequentialGroup().addContainerGap().addGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addComponent(etaPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addComponent(mainProgressBar, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addGroup(gl_panel.createSequentialGroup().addGroup(gl_panel.createParallelGroup(Alignment.LEADING).addGroup(gl_panel.createSequentialGroup().addComponent(downloadButton, GroupLayout.PREFERRED_SIZE, 101, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.RELATED).addComponent(downloadAllButton, GroupLayout.PREFERRED_SIZE, 142, GroupLayout.PREFERRED_SIZE)).addComponent(urlTextField, GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)).addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false).addComponent(outputDirectoryButton, 0, 0, Short.MAX_VALUE).addComponent(startButton, GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)))).addContainerGap()));
-		gl_panel.setVerticalGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addGroup(gl_panel.createSequentialGroup().addContainerGap().addGroup(gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(urlTextField, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE).addComponent(startButton)).addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(outputDirectoryButton).addComponent(downloadButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(downloadAllButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(ComponentPlacement.RELATED).addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE).addPreferredGap(ComponentPlacement.RELATED).addComponent(etaPanel, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.RELATED).addComponent(mainProgressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addGap(6)));
+		gl_panel.setHorizontalGroup(
+			gl_panel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
+						.addComponent(etaPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
+						.addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
+						.addComponent(mainProgressBar, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
+						.addGroup(gl_panel.createSequentialGroup()
+							.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+								.addComponent(urlTextField, GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
+								.addComponent(downloadAllButton, GroupLayout.PREFERRED_SIZE, 142, GroupLayout.PREFERRED_SIZE))
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(outputDirectoryButton, 0, 0, Short.MAX_VALUE)
+								.addComponent(startButton, GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))))
+					.addContainerGap())
+		);
+		gl_panel.setVerticalGroup(
+			gl_panel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+						.addComponent(urlTextField, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+						.addComponent(startButton))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+						.addComponent(outputDirectoryButton)
+						.addComponent(downloadAllButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(etaPanel, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(mainProgressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGap(6))
+		);
 		
 		etaLabel = new JLabel(i18n.string("worker.eta.waiting"));
 		GroupLayout gl_etaPanel = new GroupLayout(etaPanel);
@@ -131,7 +161,7 @@ public class DownloaderFrame {
 		panel.setLayout(gl_panel);
 	}
 	
-	private void initializeListeners() {		
+	private void initializeListeners() {
 		startButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -197,18 +227,103 @@ public class DownloaderFrame {
 				}
 			}
 		});
+		
+		downloadAllButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				changeItemsDownloadButtonState(false);
+				
+				List<VideoPanel> panels = new ArrayList<>();
+				
+				for (VideoPanel videoPanel : getListedVideoPanels()) {
+					if (!videoPanel.isFileAlreadyDownloaded()) {
+						panels.add(videoPanel);
+					}
+				}
+				
+				changeButtonState(false);
+				VideoManager.getVideoManager().download(panels, new VideoManager.BatchDownloadCallback() {
+					private int batchSize, videoCountLeft, actualRetryCount, actualPanelIndex;
+					
+					@Override
+					public void onDownloadsStarted(List<VideoPanel> panels, int actualBatchRetryCount) {
+						batchSize = videoCountLeft = panels.size();
+						actualRetryCount = actualBatchRetryCount;
+						
+						updateProgress();
+						
+						mainProgressBar.setIndeterminate(true);
+						mainProgressBar.setValue(0);
+					}
+					
+					@Override
+					public void onVideoDownloaded(VideoPanel videoPanel) {
+						videoCountLeft--;
+						
+						updateProgress();
+						
+						if (mainProgressBar.isIndeterminate()) {
+							mainProgressBar.setIndeterminate(false);
+						}
+						mainProgressBar.setValue((int) MathUtils.pourcent(++actualPanelIndex, batchSize));
+					}
+					
+					@Override
+					public void onRetryCalled(int newBatchRetryCount) {
+						etaLabel.setText(i18n.string("worker.extractor.eta.downloader.retry-called", newBatchRetryCount));
+						mainProgressBar.setIndeterminate(true);
+						mainProgressBar.setValue(0);
+					}
+					
+					@Override
+					public void onBatchEnd(boolean retryLimitReached) {
+						etaLabel.setText(i18n.string(retryLimitReached ? "worker.extractor.eta.error.retry-limit-reached" : "worker.eta.waiting"));
+						mainProgressBar.setIndeterminate(false);
+						mainProgressBar.setValue(0);
+						
+						changeButtonState(true);
+					}
+					
+					private void updateProgress() {
+						String multiple = batchSize > 1 ? "s" : "";
+						if (actualRetryCount == 0) {
+							etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started", videoCountLeft, multiple));
+						} else {
+							etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started.retry", videoCountLeft, multiple, actualRetryCount));
+						}
+					}
+				});
+			}
+		});
 	}
 	
 	public void changeItemsDownloadButtonState(boolean newState) {
+		for (VideoPanel videoPanel : getListedVideoPanels()) {
+			videoPanel.enableDownloadButton(newState);
+		}
+	}
+	
+	public List<VideoPanel> getListedVideoPanels() {
+		List<VideoPanel> panels = new ArrayList<>();
+		
 		for (int i = 0; i < listPanel.getComponentCount(); i++) {
 			Component component = listPanel.getComponent(i);
 			
 			if (component instanceof VideoPanel) {
-				VideoPanel videoPanel = (VideoPanel) component;
-				
-				videoPanel.enableDownloadButton(newState);
+				panels.add((VideoPanel) component);
 			}
 		}
+		
+		return panels;
+	}
+	
+	public void changeButtonState(boolean enabled) {
+		JButton[] buttons = new JButton[] {startButton, outputDirectoryButton, downloadAllButton};
+		
+		for (JButton button : buttons) {
+			button.setEnabled(enabled);
+		}
+		
 	}
 	
 	public JPanel getEtaPanel() {
@@ -221,10 +336,6 @@ public class DownloaderFrame {
 	
 	public JButton getOutputDirectoryButton() {
 		return outputDirectoryButton;
-	}
-	
-	public JButton getDownloadButton() {
-		return downloadButton;
 	}
 	
 	public JButton getDownloadAllButton() {

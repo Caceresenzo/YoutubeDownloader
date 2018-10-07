@@ -43,8 +43,12 @@ public class Language {
 			o("worker.eta.waiting", "En attente");
 			o("worker.extractor.eta.working", "Travail en cours...");
 			o("worker.extractor.eta.working.count", "Travail en cours... (%s vidéo%s sur %s)");
+			o("worker.extractor.eta.downloader.started", "Téléchargement de %s vidéo%s...");
+			o("worker.extractor.eta.downloader.started.retry", "Téléchargement de %s vidéo%s... (tentative n°%s)");
+			o("worker.extractor.eta.downloader.retry-called", "Nouvelle tentative pour les vidéos qui ont échoué... (%s)");
 			o("worker.extractor.eta.error.common", "Erreur: %s");
 			o("worker.extractor.eta.error.bad-url", "Erreur dans l'url: %s");
+			o("worker.extractor.eta.error.retry-limit-reached", "Erreur: Le nombre de tentative à été dépassé.");
 			
 			// o("worker.downloader.eta.working", "Traitement de \"%s\"...");
 			o("worker.downloader.eta.extraction", "Extraction...");

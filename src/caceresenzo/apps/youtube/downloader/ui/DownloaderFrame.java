@@ -246,6 +246,13 @@ public class DownloaderFrame {
 				}
 			}
 		});
+		
+		outputDirectoryButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				VideoManager.getVideoManager().openDownloadDirectoryChangerDialog(DownloaderFrame.this);
+			}
+		});
 	}
 	
 	/**
@@ -294,6 +301,13 @@ public class DownloaderFrame {
 		}
 		
 		return panels;
+	}
+	
+	/**
+	 * @return Main frame containing everything
+	 */
+	public JFrame getFrame() {
+		return frame;
 	}
 	
 	/**

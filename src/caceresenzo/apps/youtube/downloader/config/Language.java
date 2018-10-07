@@ -50,6 +50,8 @@ public class Language {
 			o("ui.button.download.waiting", "En attente...");
 			o("ui.button.download.already", "Déja télécharger");
 			o("ui.button.output.directory", "Dossier...");
+
+			o("ui.filechooser.download-directory.title", "Changer le dossier de téléchargement");
 			
 			o("worker.imagedownloader.eta.downloading", "Téléchargement...");
 			o("worker.imagedownloader.eta.error", "Erreur");
@@ -69,6 +71,9 @@ public class Language {
 			o("worker.downloader.eta.conversion", "Conversion vers mp3...");
 			o("worker.downloader.eta.saving", "Enregistrement...");
 			o("worker.downloader.eta.error", "Erreur: %s");
+
+			o("ui.dialog.error.title", "Erreur");
+			o("ui.dialog.error.failed-to-save-download-directory", "La sauvegarde du nouveau fichier de sauvegarde à échoué.\nPlus d'info sont disponible dans la console.\n\nRaison: %s");
 		}
 		
 	}

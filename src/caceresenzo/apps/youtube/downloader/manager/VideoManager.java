@@ -1,13 +1,19 @@
 package caceresenzo.apps.youtube.downloader.manager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 import caceresenzo.apps.youtube.downloader.config.Config;
+import caceresenzo.apps.youtube.downloader.ui.DownloaderFrame;
 import caceresenzo.apps.youtube.downloader.ui.VideoPanel;
 import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
 import caceresenzo.libs.filesystem.FileUtils;
+import caceresenzo.libs.internationalization.i18n;
 import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.thread.ThreadUtils;
 import caceresenzo.libs.thread.queue.WorkQueue;
@@ -40,12 +46,8 @@ public class VideoManager {
 	
 	/* Initializer */
 	public void initialize() {
-		DOWNLOAD_DIRECTORY = new File(Config.PATH_DOWNLOAD_DIRECTORY);
-		TEMPORARY_DIRECTORY = new File(DOWNLOAD_DIRECTORY, ".downloader");
-		
 		try {
-			FileUtils.forceFolderCreation(DOWNLOAD_DIRECTORY);
-			FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
+			initializeDirectories();
 		} catch (Exception exception) {
 			Logger.exception(exception, "Failed to create targets (download and temporary) directories");
 			System.exit(1);
@@ -53,6 +55,14 @@ public class VideoManager {
 		}
 		
 		emptyWorkingDirectory();
+	}
+	
+	private void initializeDirectories() throws IOException {
+		DOWNLOAD_DIRECTORY = new File(Config.PATH_DOWNLOAD_DIRECTORY);
+		TEMPORARY_DIRECTORY = new File(DOWNLOAD_DIRECTORY, ".downloader");
+
+		FileUtils.forceFolderCreation(DOWNLOAD_DIRECTORY);
+		FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
 	}
 	
 	/**
@@ -66,6 +76,32 @@ public class VideoManager {
 			} catch (Exception exception) {
 				;
 			}
+		}
+	}
+	
+	public void openDownloadDirectoryChangerDialog(DownloaderFrame downloaderFrame) {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(DOWNLOAD_DIRECTORY);
+		chooser.setDialogTitle(i18n.string("ui.filechooser.download-directory.title"));
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+		
+		if (chooser.showOpenDialog(downloaderFrame.getFrame()) == JFileChooser.APPROVE_OPTION) {
+			changeDownloadDirectory(chooser.getSelectedFile(), downloaderFrame);
+		}
+	}
+	
+	public void changeDownloadDirectory(File newDirectory, DownloaderFrame downloaderFrame) {
+		Config.PATH_DOWNLOAD_DIRECTORY = newDirectory.getAbsolutePath();
+		
+		try {
+			initializeDirectories();
+			
+			// TODO: Save config
+			throw new IOException("caca");
+		} catch (Exception exception) {
+			Logger.exception(exception, "Failed to save new download directory.");
+			JOptionPane.showMessageDialog(downloaderFrame.getFrame(), i18n.string("ui.dialog.error.failed-to-save-download-directory", exception.getLocalizedMessage()), i18n.string("ui.dialog.error.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

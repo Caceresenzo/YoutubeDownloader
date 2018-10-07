@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.libs.logger.Logger;
 
 /**
@@ -54,9 +53,6 @@ public class Config {
 			Logger.exception(exception, "Failed to load \"worker\" config.");
 			System.exit(-1);
 		}
-		
-		Language.getLanguage().initialize();
-		VideoManager.getVideoManager();
 	}
 	
 }

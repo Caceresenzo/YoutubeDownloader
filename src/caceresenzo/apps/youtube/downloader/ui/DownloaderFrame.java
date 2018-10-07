@@ -24,51 +24,31 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 
-import caceresenzo.apps.youtube.downloader.config.Config;
 import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.worker.PlaylistExtractionWorker;
 import caceresenzo.libs.internationalization.i18n;
+import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.math.MathUtils;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylist;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
 
+/**
+ * Main frame
+ * 
+ * @author Enzo CACERES
+ */
 public class DownloaderFrame {
 	
+	/* Components */
 	private JFrame frame;
 	private JTextField urlTextField;
 	private JScrollPane listScrollPane;
-	private JButton startButton;
 	private JProgressBar mainProgressBar;
-	private JPanel panel;
-	private JPanel listPanel;
-	private JPanel etaPanel;
-	private JButton outputDirectoryButton;
-	private JButton downloadAllButton;
+	private JPanel panel, listPanel, etaPanel;
+	private JButton startButton, outputDirectoryButton, downloadAllButton;
 	private JLabel etaLabel;
 	
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		Config.initialize();
-		
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-					
-					DownloaderFrame window = new DownloaderFrame();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
-	/**
-	 * Create the application.
-	 */
+	/* Constructor */
 	public DownloaderFrame() {
 		initialize();
 		
@@ -77,14 +57,12 @@ public class DownloaderFrame {
 		urlTextField.setText("https://www.youtube.com/playlist?list=PLw-VjHDlEOgvtnnnqWlTqByAtC7tXBg6D");
 	}
 	
-	/**
-	 * Initialize the contents of the frame.
-	 */
+	/* Initializer */
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 720, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle("Downloader");
+		frame.setTitle(i18n.string("ui.frame.title"));
 		
 		panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -111,43 +89,8 @@ public class DownloaderFrame {
 		etaPanel = new JPanel();
 		etaPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-						.addComponent(etaPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
-						.addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
-						.addComponent(mainProgressBar, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
-						.addGroup(gl_panel.createSequentialGroup()
-							.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-								.addComponent(urlTextField, GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
-								.addComponent(downloadAllButton, GroupLayout.PREFERRED_SIZE, 142, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
-								.addComponent(outputDirectoryButton, 0, 0, Short.MAX_VALUE)
-								.addComponent(startButton, GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))))
-					.addContainerGap())
-		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-						.addComponent(urlTextField, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-						.addComponent(startButton))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-						.addComponent(outputDirectoryButton)
-						.addComponent(downloadAllButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(etaPanel, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(mainProgressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addGap(6))
-		);
+		gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addGroup(gl_panel.createSequentialGroup().addContainerGap().addGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addComponent(etaPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addComponent(mainProgressBar, GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE).addGroup(gl_panel.createSequentialGroup().addGroup(gl_panel.createParallelGroup(Alignment.LEADING).addComponent(urlTextField, GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE).addComponent(downloadAllButton, GroupLayout.PREFERRED_SIZE, 142, GroupLayout.PREFERRED_SIZE)).addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false).addComponent(outputDirectoryButton, 0, 0, Short.MAX_VALUE).addComponent(startButton, GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)))).addContainerGap()));
+		gl_panel.setVerticalGroup(gl_panel.createParallelGroup(Alignment.TRAILING).addGroup(gl_panel.createSequentialGroup().addContainerGap().addGroup(gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(urlTextField, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE).addComponent(startButton)).addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(outputDirectoryButton).addComponent(downloadAllButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(ComponentPlacement.RELATED).addComponent(listScrollPane, GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE).addPreferredGap(ComponentPlacement.RELATED).addComponent(etaPanel, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.RELATED).addComponent(mainProgressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addGap(6)));
 		
 		etaLabel = new JLabel(i18n.string("worker.eta.waiting"));
 		GroupLayout gl_etaPanel = new GroupLayout(etaPanel);
@@ -161,6 +104,7 @@ public class DownloaderFrame {
 		panel.setLayout(gl_panel);
 	}
 	
+	/* Initializer */
 	private void initializeListeners() {
 		startButton.addActionListener(new ActionListener() {
 			@Override
@@ -209,13 +153,14 @@ public class DownloaderFrame {
 						@Override
 						public void onFinished(List<YoutubePlaylistItem> allItems) {
 							etaLabel.setText(i18n.string("worker.eta.waiting"));
+							mainProgressBar.setValue(0);
 							
 							state(false);
 						}
 						
 						public void state(boolean running) {
 							urlTextField.setEditable(!running);
-							startButton.setEnabled(!running);
+							changeButtonState(!running);
 							
 							if (!running) {
 								changeItemsDownloadButtonState(true);
@@ -223,7 +168,11 @@ public class DownloaderFrame {
 						}
 					}).start();
 				} catch (MalformedURLException exception) {
-					etaLabel.setText(i18n.string("worker.extractor.eta.working"));
+					etaLabel.setText(i18n.string("worker.extractor.eta.error.bad-url"));
+					if (mainProgressBar.isIndeterminate()) {
+						mainProgressBar.setIndeterminate(false);
+					}
+					mainProgressBar.setValue(0);
 				}
 			}
 		});
@@ -231,8 +180,6 @@ public class DownloaderFrame {
 		downloadAllButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				changeItemsDownloadButtonState(false);
-				
 				List<VideoPanel> panels = new ArrayList<>();
 				
 				for (VideoPanel videoPanel : getListedVideoPanels()) {
@@ -241,68 +188,100 @@ public class DownloaderFrame {
 					}
 				}
 				
-				changeButtonState(false);
-				VideoManager.getVideoManager().download(panels, new VideoManager.BatchDownloadCallback() {
-					private int batchSize, videoCountLeft, actualRetryCount, actualPanelIndex;
+				if (!panels.isEmpty()) {
+					changeItemsDownloadButtonState(false);
 					
-					@Override
-					public void onDownloadsStarted(List<VideoPanel> panels, int actualBatchRetryCount) {
-						batchSize = videoCountLeft = panels.size();
-						actualRetryCount = actualBatchRetryCount;
+					changeButtonState(false);
+					VideoManager.getVideoManager().download(panels, new VideoManager.BatchDownloadCallback() {
+						private int batchSize, videoCountLeft, actualRetryCount, actualPanelIndex;
 						
-						updateProgress();
+						@Override
+						public void onDownloadsStarted(List<VideoPanel> panels, int actualBatchRetryCount) {
+							batchSize = videoCountLeft = panels.size();
+							actualRetryCount = actualBatchRetryCount;
+							
+							updateProgress();
+							
+							mainProgressBar.setIndeterminate(true);
+							mainProgressBar.setValue(0);
+						}
 						
-						mainProgressBar.setIndeterminate(true);
-						mainProgressBar.setValue(0);
-					}
-					
-					@Override
-					public void onVideoDownloaded(VideoPanel videoPanel) {
-						videoCountLeft--;
+						@Override
+						public void onVideoDownloaded(VideoPanel videoPanel) {
+							videoCountLeft--;
+							
+							updateProgress();
+							
+							if (mainProgressBar.isIndeterminate()) {
+								mainProgressBar.setIndeterminate(false);
+							}
+							mainProgressBar.setValue((int) MathUtils.pourcent(++actualPanelIndex, batchSize));
+						}
 						
-						updateProgress();
+						@Override
+						public void onRetryCalled(int newBatchRetryCount) {
+							etaLabel.setText(i18n.string("worker.extractor.eta.downloader.retry-called", newBatchRetryCount));
+							mainProgressBar.setIndeterminate(true);
+							mainProgressBar.setValue(0);
+						}
 						
-						if (mainProgressBar.isIndeterminate()) {
+						@Override
+						public void onBatchEnd(boolean retryLimitReached) {
+							etaLabel.setText(i18n.string(retryLimitReached ? "worker.extractor.eta.error.retry-limit-reached" : "worker.eta.waiting"));
 							mainProgressBar.setIndeterminate(false);
+							mainProgressBar.setValue(0);
+							
+							changeButtonState(true);
 						}
-						mainProgressBar.setValue((int) MathUtils.pourcent(++actualPanelIndex, batchSize));
-					}
-					
-					@Override
-					public void onRetryCalled(int newBatchRetryCount) {
-						etaLabel.setText(i18n.string("worker.extractor.eta.downloader.retry-called", newBatchRetryCount));
-						mainProgressBar.setIndeterminate(true);
-						mainProgressBar.setValue(0);
-					}
-					
-					@Override
-					public void onBatchEnd(boolean retryLimitReached) {
-						etaLabel.setText(i18n.string(retryLimitReached ? "worker.extractor.eta.error.retry-limit-reached" : "worker.eta.waiting"));
-						mainProgressBar.setIndeterminate(false);
-						mainProgressBar.setValue(0);
 						
-						changeButtonState(true);
-					}
-					
-					private void updateProgress() {
-						String multiple = batchSize > 1 ? "s" : "";
-						if (actualRetryCount == 0) {
-							etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started", videoCountLeft, multiple));
-						} else {
-							etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started.retry", videoCountLeft, multiple, actualRetryCount));
+						private void updateProgress() {
+							String multiple = batchSize > 1 ? "s" : "";
+							if (actualRetryCount == 0) {
+								etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started", videoCountLeft, multiple));
+							} else {
+								etaLabel.setText(i18n.string("worker.extractor.eta.downloader.started.retry", videoCountLeft, multiple, actualRetryCount));
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		});
 	}
 	
+	/**
+	 * Change {@link JButton} enable state for all button in the frame.<br>
+	 * <ul>
+	 * <li><code>startButton</code></li>
+	 * <li><code>outputDirectoryButton</code></li>
+	 * <li><code>downloadAllButton</code></li>
+	 * </ul>
+	 * 
+	 * @param enabled
+	 *            New {@link JButton} state
+	 */
+	public void changeButtonState(boolean enabled) {
+		JButton[] buttons = new JButton[] { startButton, outputDirectoryButton, downloadAllButton };
+		
+		for (JButton button : buttons) {
+			button.setEnabled(enabled);
+		}
+	}
+	
+	/**
+	 * Change "download" {@link JButton} state of every {@link VideoPanel} present in the {@link #listPanel}
+	 * 
+	 * @param newState
+	 *            New {@link JButton} state
+	 */
 	public void changeItemsDownloadButtonState(boolean newState) {
 		for (VideoPanel videoPanel : getListedVideoPanels()) {
 			videoPanel.enableDownloadButton(newState);
 		}
 	}
 	
+	/**
+	 * @return {@link List} of every instance of {@link VideoPanel} actually in the {@link #listPanel}
+	 */
 	public List<VideoPanel> getListedVideoPanels() {
 		List<VideoPanel> panels = new ArrayList<>();
 		
@@ -317,48 +296,22 @@ public class DownloaderFrame {
 		return panels;
 	}
 	
-	public void changeButtonState(boolean enabled) {
-		JButton[] buttons = new JButton[] {startButton, outputDirectoryButton, downloadAllButton};
-		
-		for (JButton button : buttons) {
-			button.setEnabled(enabled);
-		}
-		
+	/**
+	 * Display the frame
+	 */
+	public static void display() {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					
+					DownloaderFrame window = new DownloaderFrame();
+					window.frame.setVisible(true);
+				} catch (Exception exception) {
+					Logger.exception(exception, "Failed to display Downloader frame.");
+				}
+			}
+		});
 	}
 	
-	public JPanel getEtaPanel() {
-		return etaPanel;
-	}
-	
-	public JPanel getPanel() {
-		return panel;
-	}
-	
-	public JButton getOutputDirectoryButton() {
-		return outputDirectoryButton;
-	}
-	
-	public JButton getDownloadAllButton() {
-		return downloadAllButton;
-	}
-	
-	public JButton getStartButton() {
-		return startButton;
-	}
-	
-	public JLabel getEtaLabel() {
-		return etaLabel;
-	}
-	
-	public JScrollPane getListScrollPane() {
-		return listScrollPane;
-	}
-	
-	public JTextField getUrlTextField() {
-		return urlTextField;
-	}
-	
-	public JProgressBar getMainProgressBar() {
-		return mainProgressBar;
-	}
 }

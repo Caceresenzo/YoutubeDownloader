@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import caceresenzo.apps.youtube.downloader.config.Config;
 import caceresenzo.apps.youtube.downloader.exception.ExtractionFailedException;
+import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.thread.StreamReaderThread;
 import caceresenzo.libs.array.SparseArray;
 import caceresenzo.libs.cryptography.MD5;
@@ -53,30 +54,15 @@ public class VideoDownloadWorker extends WorkerThread {
 	}
 	
 	@Override
-	protected void execute() {
-		final File downloadDirectory = new File(Config.PATH_DOWNLOAD_DIRECTORY);
-		final File processingDirectory = new File(downloadDirectory, ".downloader");
-		
-		try {
-			FileUtils.forceFolderCreation(downloadDirectory);
-			FileUtils.forceFolderCreation(processingDirectory);
-		} catch (Exception exception) {
-			if (callback != null) {
-				callback.onException(exception, true);
-			}
-			
-			cancel();
-			return;
-		}
-		
+	protected void execute() {		
 		if (callback != null) {
 			callback.onStarted();
 		}
 		
 		for (final YoutubePlaylistItem item : videos) {
 			try {
-				final File videoFile = new File(downloadDirectory, FileUtils.replaceIllegalChar(item.getVideoMeta().getTitle()) + ".mp3");
-				final File md5VideoFile = new File(processingDirectory, MD5.silentMd5(videoFile.getName()) + "." + YoutubeFormat.WEBM);
+				final File videoFile = new File(VideoManager.DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(item.getVideoMeta().getTitle()) + ".mp3");
+				final File md5VideoFile = new File(VideoManager.TEMPORARY_DIRECTORY, MD5.silentMd5(videoFile.getName()) + "." + YoutubeFormat.WEBM);
 				final ObjectWrapper<YoutubeVideo> youtubeVideoWrapper = new ObjectWrapper<>(null);
 				
 				if (videoFile.exists()) {

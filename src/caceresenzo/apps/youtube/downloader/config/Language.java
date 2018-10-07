@@ -40,7 +40,9 @@ public class Language {
 		}
 		
 		@Override
-		public void set() {			
+		public void set() {
+			o("ui.frame.title", "Youtube Downloader");
+			
 			o("ui.button.start", "Démarrer");
 			o("ui.button.download.selected", "Télécharger");
 			o("ui.button.download.all", "Tout télécharger");
@@ -59,7 +61,7 @@ public class Language {
 			o("worker.extractor.eta.downloader.started.retry", "Téléchargement de %s vidéo%s... (tentative n°%s)");
 			o("worker.extractor.eta.downloader.retry-called", "Nouvelle tentative pour les vidéos qui ont échoué... (%s)");
 			o("worker.extractor.eta.error.common", "Erreur: %s");
-			o("worker.extractor.eta.error.bad-url", "Erreur dans l'url: %s");
+			o("worker.extractor.eta.error.bad-url", "Erreur: L'url n'est pas bonne ou ne continent pas de lien vers une playlist");
 			o("worker.extractor.eta.error.retry-limit-reached", "Erreur: Le nombre de tentative à été dépassé.");
 			
 			o("worker.downloader.eta.extraction", "Extraction...");

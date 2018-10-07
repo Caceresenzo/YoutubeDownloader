@@ -1,11 +1,14 @@
 package caceresenzo.apps.youtube.downloader.manager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import caceresenzo.apps.youtube.downloader.config.Config;
 import caceresenzo.apps.youtube.downloader.ui.VideoPanel;
 import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
+import caceresenzo.libs.filesystem.FileUtils;
+import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.thread.ThreadUtils;
 import caceresenzo.libs.thread.queue.WorkQueue;
 
@@ -18,6 +21,8 @@ public class VideoManager {
 	
 	/* Static */
 	private static VideoManager MANAGER;
+	public static File DOWNLOAD_DIRECTORY;
+	public static File TEMPORARY_DIRECTORY;
 	
 	/* Variables */
 	private WorkQueue queue;
@@ -31,6 +36,37 @@ public class VideoManager {
 	private VideoManager() {
 		this.queue = new WorkQueue(Config.WORKER_COUNT_MAX);
 		this.workerTaskGroupId = queue.registerTaskGroup(1);
+	}
+	
+	/* Initializer */
+	public void initialize() {
+		DOWNLOAD_DIRECTORY = new File(Config.PATH_DOWNLOAD_DIRECTORY);
+		TEMPORARY_DIRECTORY = new File(DOWNLOAD_DIRECTORY, ".downloader");
+		
+		try {
+			FileUtils.forceFolderCreation(DOWNLOAD_DIRECTORY);
+			FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
+		} catch (Exception exception) {
+			Logger.exception(exception, "Failed to create targets (download and temporary) directories");
+			System.exit(1);
+			return;
+		}
+		
+		emptyWorkingDirectory();
+	}
+	
+	/**
+	 * Empty, if not already, the folder used to download .webm files
+	 */
+	private void emptyWorkingDirectory() {
+		if (TEMPORARY_DIRECTORY.list().length != 0) {
+			try {
+				FileUtils.deleteTree(TEMPORARY_DIRECTORY);
+				FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
+			} catch (Exception exception) {
+				;
+			}
+		}
 	}
 	
 	/**

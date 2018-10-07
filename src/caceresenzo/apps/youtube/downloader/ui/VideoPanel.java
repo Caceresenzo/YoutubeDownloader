@@ -9,6 +9,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
@@ -16,27 +17,35 @@ import caceresenzo.apps.youtube.downloader.config.Config;
 import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.worker.ImageDownloaderWorker;
 import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
-import caceresenzo.libs.cryptography.MD5;
 import caceresenzo.libs.filesystem.FileUtils;
 import caceresenzo.libs.internationalization.i18n;
 import caceresenzo.libs.logger.Logger;
 import caceresenzo.libs.string.StringUtils;
-import caceresenzo.libs.youtube.format.YoutubeFormat;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
-import javax.swing.JProgressBar;
 
+/**
+ * Displayer components that extends {@link JPanel} to showcase a single {@link YoutubePlaylistItem}
+ * 
+ * @author Enzo CACERES
+ */
 public class VideoPanel extends JPanel {
 	
-	private JLabel imageLabel;
-	private JLabel titleLabel;
+	/* Components */
+	private JLabel imageLabel, titleLabel, etaLabel;
 	private JButton downloadButton;
 	private JProgressBar itemProgressBar;
-	private JLabel etaLabel;
 	
+	/* Variables */
 	private final YoutubePlaylistItem youtubePlaylistItem;
 	private final File videoFile;
 	private final VideoDownloadWorker.WorkerCallback workerCallback;
 	
+	/**
+	 * Create a new {@link VideoPanel} that will handle his own download button and progress
+	 * 
+	 * @param youtubePlaylistItem
+	 *            Attached {@link YoutubePlaylistItem}
+	 */
 	public VideoPanel(final YoutubePlaylistItem youtubePlaylistItem) {
 		this.youtubePlaylistItem = youtubePlaylistItem;
 		this.videoFile = new File(Config.PATH_DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(youtubePlaylistItem.getVideoMeta().getTitle()) + ".mp3");
@@ -152,6 +161,7 @@ public class VideoPanel extends JPanel {
 		initializeListeners();
 	}
 	
+	/* Initializer */
 	private void initialize() {
 		setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		
@@ -175,6 +185,7 @@ public class VideoPanel extends JPanel {
 		setLayout(groupLayout);
 	}
 	
+	/* Initializer */
 	private void initializeListeners() {
 		downloadButton.addActionListener(new ActionListener() {
 			@Override
@@ -184,6 +195,13 @@ public class VideoPanel extends JPanel {
 		});
 	}
 	
+	/**
+	 * Change {@link JButton#setEnabled(boolean)}, but will only affect it if the file hasn't been downloaded yet! ({@link #isFileAlreadyDownloaded()})
+	 * 
+	 * @param enable
+	 *            New button state
+	 * @return Itself
+	 */
 	public VideoPanel enableDownloadButton(boolean enable) {
 		if (!isFileAlreadyDownloaded()) {
 			this.downloadButton.setEnabled(enable);
@@ -192,10 +210,16 @@ public class VideoPanel extends JPanel {
 		return this;
 	}
 	
+	/**
+	 * @return If the file has already been downloaded
+	 */
 	public boolean isFileAlreadyDownloaded() {
 		return videoFile.exists();
 	}
 	
+	/**
+	 * Will disable the download button and set its text to "Already downloaded" (translated)
+	 */
 	public void updateDownloadButton() {
 		if (isFileAlreadyDownloaded()) {
 			downloadButton.setEnabled(false);
@@ -203,19 +227,12 @@ public class VideoPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * @return An instance of a {@link VideoDownloadWorker} created with the {@link VideoPanel} with his attached {@link VideoDownloadWorker.WorkerCallback}<br>
+	 *         You will need to call {@link VideoDownloadWorker#start()} if you want to start extraction/download/conversion process.
+	 */
 	public VideoDownloadWorker download() {
 		return VideoDownloadWorker.fromVideoItem(youtubePlaylistItem).callback(workerCallback);
 	}
 	
-	public JProgressBar getItemProgressBar() {
-		return itemProgressBar;
-	}
-	
-	public YoutubePlaylistItem getYoutubePlaylistItem() {
-		return youtubePlaylistItem;
-	}
-	
-	public JLabel getEtaLabel() {
-		return etaLabel;
-	}
 }

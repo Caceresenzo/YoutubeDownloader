@@ -9,6 +9,11 @@ import caceresenzo.apps.youtube.downloader.worker.VideoDownloadWorker;
 import caceresenzo.libs.thread.ThreadUtils;
 import caceresenzo.libs.thread.queue.WorkQueue;
 
+/**
+ * Batch-download handling class for {@link VideoPanel}s
+ * 
+ * @author Enzo CACERES
+ */
 public class VideoManager {
 	
 	/* Static */
@@ -143,14 +148,45 @@ public class VideoManager {
 		return MANAGER;
 	}
 	
+	/**
+	 * Batch callback used to follow global progression
+	 * 
+	 * @author Enzo CACERES
+	 */
 	public interface BatchDownloadCallback {
 		
+		/**
+		 * Called when the whole process have started or when a retry has been started
+		 * 
+		 * @param panels
+		 *            Actual batch panels that will be download
+		 * @param actualBatchRetryCount
+		 *            Actual retry count, if is equal to 0, that the first run
+		 */
 		void onDownloadsStarted(List<VideoPanel> panels, int actualBatchRetryCount);
 		
+		/**
+		 * Called when a {@link VideoDownloadWorker} has just finished
+		 * 
+		 * @param videoPanel
+		 *            Attached {@link VideoPanel} of the {@link VideoDownloadWorker}
+		 */
 		void onVideoDownloaded(VideoPanel videoPanel);
 		
+		/**
+		 * Called when a retry batch is ready to begin
+		 * 
+		 * @param newBatchRetryCount
+		 *            New barch retry count
+		 */
 		void onRetryCalled(int newBatchRetryCount);
 		
+		/**
+		 * Called when the whole download process has ended
+		 * 
+		 * @param retryLimitReached
+		 *            If the stop reason is a retry limit reached
+		 */
 		void onBatchEnd(boolean retryLimitReached);
 		
 	}

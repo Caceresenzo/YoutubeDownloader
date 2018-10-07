@@ -7,6 +7,11 @@ import java.util.Properties;
 import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.libs.logger.Logger;
 
+/**
+ * External .properties config handler
+ * 
+ * @author Enzo CACERES
+ */
 public class Config {
 	
 	/* Base config directory */

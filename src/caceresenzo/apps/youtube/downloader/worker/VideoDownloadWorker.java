@@ -25,15 +25,27 @@ import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
 import caceresenzo.libs.youtube.video.VideoMeta;
 import caceresenzo.libs.youtube.video.YoutubeVideo;
 
+/**
+ * Extractor/Downloader/Converter work handler
+ * 
+ * @author Enzo CACERES
+ */
 public class VideoDownloadWorker extends WorkerThread {
 	
+	/* Variables */
 	private List<YoutubePlaylistItem> videos;
 	private WorkerCallback callback;
 	
+	/* Constructor */
 	private VideoDownloadWorker(List<YoutubePlaylistItem> videos) {
 		this.videos = videos;
 	}
 	
+	/**
+	 * @param workerCallback
+	 *            Attach this callback to this worker
+	 * @return Itself
+	 */
 	public VideoDownloadWorker callback(WorkerCallback callback) {
 		this.callback = callback;
 		
@@ -128,7 +140,6 @@ public class VideoDownloadWorker extends WorkerThread {
 					callback.onVideoConversion(item);
 				}
 				
-				// size= 768kB time=00:00:57.62 bitrate= 109.2kbits/s speed=8.39x
 				StringBuilder builder = new StringBuilder(Config.PATH_FFMPEG_EXECUTABLE);
 				builder.append(" -i ");
 				builder.append("\"").append(md5VideoFile.getAbsolutePath()).append("\"");
@@ -152,7 +163,7 @@ public class VideoDownloadWorker extends WorkerThread {
 							long processed = 0;
 							
 							Matcher matcher = processedSizePattern.matcher(line);
-							if (matcher.find()) {
+							if (matcher.find()) { /* Exemple: size= 768kB time=00:00:57.62 bitrate= 109.2kbits/s speed=8.39x */
 								processed = Long.parseLong(matcher.group(1));
 								
 								callback.onVideoConversionProgressUpdate(item, MathUtils.pourcent(processed * 1000, fileSize));
@@ -173,12 +184,12 @@ public class VideoDownloadWorker extends WorkerThread {
 					callback.onVideoConversionProgressUpdate(item, 100);
 				}
 				
-				ffmpegProcess.destroy();
-				
 				/* Saving */
 				if (callback != null) {
 					callback.onVideoSaving(item, videoFile);
 				}
+				
+				ffmpegProcess.destroy();
 				
 				if (!md5VideoFile.delete()) {
 					throw new IOException("Failed to delete processing file.");
@@ -197,34 +208,119 @@ public class VideoDownloadWorker extends WorkerThread {
 		}
 	}
 	
+	/**
+	 * Create a {@link VideoDownloadWorker} from a {@link List} of {@link YoutubePlaylistItem}
+	 * 
+	 * @param videos
+	 *            Targetted {@link List}
+	 * @return A new {@link VideoDownloadWorker} instance
+	 */
 	public static VideoDownloadWorker fromVideoList(List<YoutubePlaylistItem> videos) {
 		return new VideoDownloadWorker(videos);
 	}
 	
+	/**
+	 * Create a {@link VideoDownloadWorker} from a single {@link YoutubePlaylistItem}
+	 * 
+	 * @param item
+	 *            Targetted {@link YoutubePlaylistItem}
+	 * @return A new {@link VideoDownloadWorker} instance
+	 */
 	public static VideoDownloadWorker fromVideoItem(YoutubePlaylistItem item) {
 		return fromVideoList(Arrays.asList(item));
 	}
 	
+	/**
+	 * Worker callback used to tell progress about the whole process
+	 * 
+	 * @author Enzo CACERES
+	 */
 	public interface WorkerCallback {
 		
+		/**
+		 * Called when the {@link VideoDownloadWorker} is ready to start
+		 */
 		public void onStarted();
 		
+		/**
+		 * Called when the {@link YouTubeExtractor} is ready to be called
+		 * 
+		 * @param item
+		 *            Target item to extract url
+		 */
 		public void onVideoExtraction(YoutubePlaylistItem item);
 		
+		/**
+		 * Called when an {@link YoutubePlaylistItem} is starting downloading
+		 * 
+		 * @param item
+		 *            Downloading item
+		 */
 		public void onVideoDownload(YoutubePlaylistItem item);
 		
+		/**
+		 * Called when the downloader update his progress
+		 * 
+		 * @param item
+		 *            Downloading item
+		 * @param progress
+		 *            New progress (out of 100%)
+		 */
 		public void onVideoDownloadProgressUpdate(YoutubePlaylistItem item, float progress);
 		
+		/**
+		 * Called when an {@link YoutubePlaylistItem} is starting converting
+		 * 
+		 * @param item
+		 *            Converting item
+		 */
 		public void onVideoConversion(YoutubePlaylistItem item);
 		
+		/**
+		 * Called when the converter update his progress
+		 * 
+		 * @param item
+		 *            Converting item
+		 * @param progress
+		 *            New progress (out of 100%)
+		 */
 		public void onVideoConversionProgressUpdate(YoutubePlaylistItem item, float progress);
 		
+		/**
+		 * Called when the {@link VideoDownloadWorker} need to kill FFMPEG instance and delete old processing file
+		 * 
+		 * @param item
+		 *            Actual item
+		 * @param targetFile
+		 *            Target file where file has been downloaded
+		 */
 		public void onVideoSaving(YoutubePlaylistItem item, File targetFile);
 		
+		/**
+		 * Called when an exception has been throw when processing a {@link YoutubePlaylistItem}
+		 * 
+		 * @param item
+		 *            Actual item
+		 * @param exception
+		 *            Throw {@link Exception}
+		 * @param critical
+		 *            If the {@link Exception} is critical and the process can't continue
+		 */
 		public void onVideoException(YoutubePlaylistItem item, Exception exception, boolean critical);
 		
+		/**
+		 * Called when an exception has been throw without processing a {@link YoutubePlaylistItem}
+		 * 
+		 * @param exception
+		 *            Throw {@link Exception}
+		 * @param critical
+		 *            If the {@link Exception} is critical and the process can't continue
+		 */
 		public void onException(Exception exception, boolean critical);
 		
+		/**
+		 * Called when the {@link VideoDownloadWorker} has totally finished
+		 */
 		public void onFinished();
 		
 	}

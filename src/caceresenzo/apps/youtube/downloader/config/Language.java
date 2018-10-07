@@ -3,21 +3,35 @@ package caceresenzo.apps.youtube.downloader.config;
 import caceresenzo.libs.internationalization.HardInternationalization;
 import caceresenzo.libs.internationalization.i18n;
 
+/**
+ * Language handler class
+ * 
+ * @author Enzo CACERES
+ */
 public class Language {
 	
+	/* Constants */
 	public static final String LANGUAGE_FRENCH = "Français";
 	
+	/* Variables */
 	private static Language LANGUAGE;
 	private HardInternationalization selected = null;
 	
+	/* Constructor */
 	private Language() {
 		selected = new French();
 	}
 	
+	/* Initializer */
 	public void initialize() {
 		i18n.setSelectedLanguage(LANGUAGE_FRENCH);
 	}
 	
+	/**
+	 * French {@link HardInternationalization}
+	 * 
+	 * @author Enzo CACERES
+	 */
 	private class French extends HardInternationalization {
 		
 		public French() {
@@ -26,9 +40,7 @@ public class Language {
 		}
 		
 		@Override
-		public void set() {
-			o("error.title", "Erreur");
-			
+		public void set() {			
 			o("ui.button.start", "Démarrer");
 			o("ui.button.download.selected", "Télécharger");
 			o("ui.button.download.all", "Tout télécharger");
@@ -50,7 +62,6 @@ public class Language {
 			o("worker.extractor.eta.error.bad-url", "Erreur dans l'url: %s");
 			o("worker.extractor.eta.error.retry-limit-reached", "Erreur: Le nombre de tentative à été dépassé.");
 			
-			// o("worker.downloader.eta.working", "Traitement de \"%s\"...");
 			o("worker.downloader.eta.extraction", "Extraction...");
 			o("worker.downloader.eta.download", "Téléchargement...");
 			o("worker.downloader.eta.conversion", "Conversion vers mp3...");
@@ -60,10 +71,16 @@ public class Language {
 		
 	}
 	
+	/**
+	 * @return Selected {@link HardInternationalization} instance
+	 */
 	public HardInternationalization getSelected() {
 		return selected;
 	}
 	
+	/**
+	 * @return Language singleton
+	 */
 	public static Language getLanguage() {
 		if (LANGUAGE == null) {
 			LANGUAGE = new Language();
@@ -72,6 +89,9 @@ public class Language {
 		return LANGUAGE;
 	}
 	
+	/**
+	 * @return Actually selected {@link HardInternationalization}
+	 */
 	public static HardInternationalization getActual() {
 		return getLanguage().getSelected();
 	}

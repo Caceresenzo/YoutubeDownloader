@@ -58,8 +58,12 @@ public class Config {
 		}
 	}
 	
+	/**
+	 * Update and save {@link #PROPERTIES_PATHS} and {@link #PROPERTIES_WORKER}<br>
+	 * <b>WARNING: This function will kill the program if any exception append when saving file</b><br>
+	 */
 	public static void save() {
-		try {
+		try { /* Paths */
 			PROPERTIES_PATHS.setProperty("path.dowload.directory", String.valueOf(PATH_DOWNLOAD_DIRECTORY));
 			PROPERTIES_PATHS.setProperty("path.ffmpeg.executable", String.valueOf(PATH_FFMPEG_EXECUTABLE));
 			
@@ -69,7 +73,7 @@ public class Config {
 			System.exit(-1);
 		}
 		
-		try {
+		try { /* Worker */
 			PROPERTIES_WORKER.setProperty("worker.count.max", String.valueOf(WORKER_COUNT_MAX));
 			PROPERTIES_WORKER.setProperty("worker.batch.max_retry_count", String.valueOf(WORKER_BATCH_MAX_RETRY_COUNT));
 			

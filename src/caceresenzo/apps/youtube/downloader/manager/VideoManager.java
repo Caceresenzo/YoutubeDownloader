@@ -60,7 +60,7 @@ public class VideoManager {
 	private void initializeDirectories() throws IOException {
 		DOWNLOAD_DIRECTORY = new File(Config.PATH_DOWNLOAD_DIRECTORY);
 		TEMPORARY_DIRECTORY = new File(DOWNLOAD_DIRECTORY, ".downloader");
-
+		
 		FileUtils.forceFolderCreation(DOWNLOAD_DIRECTORY);
 		FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
 	}
@@ -79,6 +79,12 @@ public class VideoManager {
 		}
 	}
 	
+	/**
+	 * Open the {@link JFileChooser} dialog to select a new download directory
+	 * 
+	 * @param downloaderFrame
+	 *            Source {@link DownloaderFrame} to allow frame hierarchy
+	 */
 	public void openDownloadDirectoryChangerDialog(DownloaderFrame downloaderFrame) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(DOWNLOAD_DIRECTORY);
@@ -91,7 +97,21 @@ public class VideoManager {
 		}
 	}
 	
+	/**
+	 * Directly set a new download directory
+	 * 
+	 * @param newDirectory
+	 *            Target new directory
+	 * @param downloaderFrame
+	 *            Source {@link DownloaderFrame} to allow frame hierarchy
+	 * @throws IllegalStateException
+	 *             If the privided file is not a directory
+	 */
 	public void changeDownloadDirectory(File newDirectory, DownloaderFrame downloaderFrame) {
+		if (!newDirectory.isDirectory()) {
+			throw new IllegalStateException("The provided File is not a directory.");
+		}
+		
 		try {
 			Config.PATH_DOWNLOAD_DIRECTORY = newDirectory.getAbsolutePath();
 			Config.save();

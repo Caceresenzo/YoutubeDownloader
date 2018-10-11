@@ -33,7 +33,7 @@ import caceresenzo.libs.youtube.playlist.YoutubePlaylist;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
 
 /**
- * Main frame
+ * Main frame, created with WindowBuilder
  * 
  * @author Enzo CACERES
  */
@@ -54,7 +54,8 @@ public class DownloaderFrame {
 		
 		initializeListeners();
 		
-		urlTextField.setText("https://www.youtube.com/playlist?list=PLw-VjHDlEOgvtnnnqWlTqByAtC7tXBg6D");
+		/* Dummy playlist, to found it: Type "playlist music" on Youtube */
+		// urlTextField.setText("https://www.youtube.com/playlist?list=PLw-VjHDlEOgvtnnnqWlTqByAtC7tXBg6D");
 	}
 	
 	/* Initializer */

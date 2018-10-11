@@ -92,13 +92,11 @@ public class VideoManager {
 	}
 	
 	public void changeDownloadDirectory(File newDirectory, DownloaderFrame downloaderFrame) {
-		Config.PATH_DOWNLOAD_DIRECTORY = newDirectory.getAbsolutePath();
-		
 		try {
-			initializeDirectories();
+			Config.PATH_DOWNLOAD_DIRECTORY = newDirectory.getAbsolutePath();
+			Config.save();
 			
-			// TODO: Save config
-			throw new IOException("caca");
+			initializeDirectories();
 		} catch (Exception exception) {
 			Logger.exception(exception, "Failed to save new download directory.");
 			JOptionPane.showMessageDialog(downloaderFrame.getFrame(), i18n.string("ui.dialog.error.failed-to-save-download-directory", exception.getLocalizedMessage()), i18n.string("ui.dialog.error.title"), JOptionPane.ERROR_MESSAGE);

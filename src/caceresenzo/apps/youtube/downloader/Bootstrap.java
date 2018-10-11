@@ -19,8 +19,8 @@ public class Bootstrap {
 	
 	/* Boostrap */
 	public static void main(String[] args) {
-		Config.initialize();
 		Language.getLanguage().initialize();
+		Config.initialize();
 		VideoManager.getVideoManager().initialize();
 		
 		DownloaderFrame.display();

@@ -5,6 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import caceresenzo.libs.internationalization.i18n;
 import caceresenzo.libs.logger.Logger;
 
 /**
@@ -40,9 +44,14 @@ public class Config {
 			
 			PATH_DOWNLOAD_DIRECTORY = PROPERTIES_PATHS.getProperty("path.dowload.directory");
 			PATH_FFMPEG_EXECUTABLE = PROPERTIES_PATHS.getProperty("path.ffmpeg.executable");
+			
+			if (!(new File(PATH_FFMPEG_EXECUTABLE).exists())) {
+				JOptionPane.showMessageDialog(new JFrame(), i18n.string("ui.dialog.error.ffmpeg-not-found", PATH_FFMPEG_EXECUTABLE), i18n.string("ui.dialog.error.title"), JOptionPane.ERROR_MESSAGE);
+				System.exit(-1);
+				throw new Exception("FFMPEG target don't exist.");
+			}
 		} catch (Exception exception) {
-			Logger.exception(exception, "Failed to load \"paths\" config.");
-			System.exit(-1);
+			handleConfigException(exception, "paths");
 		}
 		
 		/* Worker */
@@ -53,8 +62,7 @@ public class Config {
 			WORKER_COUNT_MAX = Integer.parseInt(PROPERTIES_WORKER.getProperty("worker.count.max"));
 			WORKER_BATCH_MAX_RETRY_COUNT = Integer.parseInt(PROPERTIES_WORKER.getProperty("worker.batch.max_retry_count"));
 		} catch (Exception exception) {
-			Logger.exception(exception, "Failed to load \"worker\" config.");
-			System.exit(-1);
+			handleConfigException(exception, "worker");
 		}
 	}
 	
@@ -69,8 +77,7 @@ public class Config {
 			
 			PROPERTIES_PATHS.store(new FileOutputStream(CONFIG_PATHS), null);
 		} catch (Exception exception) {
-			Logger.exception(exception, "Failed to save \"paths\" config.");
-			System.exit(-1);
+			handleConfigException(exception, "paths");
 		}
 		
 		try { /* Worker */
@@ -79,9 +86,23 @@ public class Config {
 			
 			PROPERTIES_WORKER.store(new FileOutputStream(CONFIG_WORKER), null);
 		} catch (Exception exception) {
-			Logger.exception(exception, "Failed to save \"worker\" config.");
-			System.exit(-1);
+			handleConfigException(exception, "worker");
 		}
+	}
+	
+	/**
+	 * Handle the exception that has been throw when a config save or load is called.<br>
+	 * This function will log the exception in the console, will show a {@link JOptionPane} and exit the program.
+	 * 
+	 * @param exception
+	 *            Throw exception
+	 * @param config
+	 *            Target config name
+	 */
+	private static void handleConfigException(Exception exception, String config) {
+		Logger.exception(exception, "Failed to save/load \"%s\" config.", config);
+		JOptionPane.showMessageDialog(new JFrame(), i18n.string("ui.dialog.error.config-failed", exception.getLocalizedMessage()), i18n.string("ui.dialog.error.title"), JOptionPane.ERROR_MESSAGE);
+		System.exit(-1);
 	}
 	
 }

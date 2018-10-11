@@ -73,6 +73,8 @@ public class Language {
 			o("worker.downloader.eta.error", "Erreur: %s");
 
 			o("ui.dialog.error.title", "Erreur");
+			o("ui.dialog.error.ffmpeg-not-found", "L'executable de FFMPEG n'a pas été trouvé sur la cible: \"%s\".\nL'application ne peut pas continuer.");
+			o("ui.dialog.error.config-failed", "La configuration à renvoyé une erreur: %s.\nL'application ne peut pas continuer.");
 			o("ui.dialog.error.failed-to-save-download-directory", "La sauvegarde du nouveau fichier de sauvegarde à échoué.\nPlus d'info sont disponible dans la console.\n\nRaison: %s");
 		}
 		

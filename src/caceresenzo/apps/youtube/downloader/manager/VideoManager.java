@@ -49,7 +49,7 @@ public class VideoManager {
 		try {
 			initializeDirectories();
 		} catch (Exception exception) {
-			Logger.exception(exception, "Failed to create targets (download and temporary) directories");
+			Logger.exception(exception, "Failed to create targets (download and/or temporary) directories");
 			System.exit(1);
 			return;
 		}
@@ -61,8 +61,8 @@ public class VideoManager {
 		DOWNLOAD_DIRECTORY = new File(Config.PATH_DOWNLOAD_DIRECTORY);
 		TEMPORARY_DIRECTORY = new File(DOWNLOAD_DIRECTORY, ".downloader");
 		
-		FileUtils.forceFolderCreation(DOWNLOAD_DIRECTORY);
-		FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
+		FileUtils.forceDirectoryCreation(DOWNLOAD_DIRECTORY);
+		FileUtils.forceDirectoryCreation(TEMPORARY_DIRECTORY);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class VideoManager {
 		if (TEMPORARY_DIRECTORY.list().length != 0) {
 			try {
 				FileUtils.deleteTree(TEMPORARY_DIRECTORY);
-				FileUtils.forceFolderCreation(TEMPORARY_DIRECTORY);
+				FileUtils.forceDirectoryCreation(TEMPORARY_DIRECTORY);
 			} catch (Exception exception) {
 				;
 			}

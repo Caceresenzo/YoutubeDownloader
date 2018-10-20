@@ -48,7 +48,7 @@ public class VideoPanel extends JPanel {
 	 */
 	public VideoPanel(final YoutubePlaylistItem youtubePlaylistItem) {
 		this.youtubePlaylistItem = youtubePlaylistItem;
-		this.videoFile = new File(Config.PATH_DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(youtubePlaylistItem.getVideoMeta().getTitle()) + ".mp3");
+		this.videoFile = VideoDownloadWorker.createTargetVideoFile(youtubePlaylistItem.getVideoMeta().getTitle());
 		this.workerCallback = new VideoDownloadWorker.WorkerCallback() {
 			private Exception error;
 			

@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import caceresenzo.apps.youtube.downloader.config.Config;
 import caceresenzo.apps.youtube.downloader.exception.ExtractionFailedException;
+import caceresenzo.apps.youtube.downloader.exception.FFmpegTimeoutException;
 import caceresenzo.apps.youtube.downloader.manager.VideoManager;
 import caceresenzo.apps.youtube.downloader.thread.StreamReaderThread;
 import caceresenzo.libs.array.SparseArray;
@@ -33,6 +34,9 @@ import caceresenzo.libs.youtube.video.YoutubeVideo;
  */
 public class VideoDownloadWorker extends WorkerThread {
 	
+	/* Constants */
+	public static final int FFMPEG_THREAD_TIMEOUT = 60 * 1000;
+	
 	/* Variables */
 	private List<YoutubePlaylistItem> videos;
 	private WorkerCallback callback;
@@ -54,15 +58,15 @@ public class VideoDownloadWorker extends WorkerThread {
 	}
 	
 	@Override
-	protected void execute() {		
+	protected void execute() {
 		if (callback != null) {
 			callback.onStarted();
 		}
 		
 		for (final YoutubePlaylistItem item : videos) {
 			try {
-				final File videoFile = new File(VideoManager.DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(item.getVideoMeta().getTitle()) + ".mp3");
-				final File md5VideoFile = new File(VideoManager.TEMPORARY_DIRECTORY, MD5.silentMd5(videoFile.getName()) + "." + YoutubeFormat.WEBM);
+				final File videoFile = createTargetVideoFile(item.getVideoMeta().getTitle());
+				final File md5VideoFile = new File(VideoManager.TEMPORARY_DIRECTORY, MD5.silentMd5(videoFile.getName()));
 				final ObjectWrapper<YoutubeVideo> youtubeVideoWrapper = new ObjectWrapper<>(null);
 				
 				if (videoFile.exists()) {
@@ -85,7 +89,7 @@ public class VideoDownloadWorker extends WorkerThread {
 						for (YoutubeVideo video : youtubeFiles.values()) {
 							YoutubeFormat format = video.getFormat();
 							
-							if (format.getExtension().equals(YoutubeFormat.WEBM) && format.getVideoCodec().equals(VideoCodec.NONE)) {
+							if (format.getVideoCodec().equals(VideoCodec.NONE)) {
 								if (highestAudioVideo != null) {
 									if (highestAudioVideo.getFormat().getAudioBitrate() < format.getAudioBitrate()) {
 										highestAudioVideo = video;
@@ -97,6 +101,15 @@ public class VideoDownloadWorker extends WorkerThread {
 						}
 						
 						if (highestAudioVideo == null) {
+							Logger.error("Failed to get a valid file.");
+							Logger.error("Available formats:");
+							
+							for (YoutubeVideo video : youtubeFiles.values()) {
+								YoutubeFormat format = video.getFormat();
+								
+								Logger.error("\t- %s", format.toString());
+							}
+							
 							throw new ExtractionFailedException(videoMeta);
 						}
 						
@@ -127,6 +140,7 @@ public class VideoDownloadWorker extends WorkerThread {
 				}
 				
 				StringBuilder builder = new StringBuilder(Config.PATH_FFMPEG_EXECUTABLE);
+				builder.append(" -y "); /* Force override */
 				builder.append(" -i ");
 				builder.append("\"").append(md5VideoFile.getAbsolutePath()).append("\"");
 				builder.append(" ");
@@ -142,9 +156,11 @@ public class VideoDownloadWorker extends WorkerThread {
 				final long fileSize = md5VideoFile.length();
 				final Pattern processedSizePattern = Pattern.compile("^size\\=[\\s]*(\\d*).*?$");
 				
-				StreamReaderThread streamReader = new StreamReaderThread(ffmpegProcess.getErrorStream(), new StreamReaderThread.StreamListener() {
+				StreamReaderThread outputStreamReader = new StreamReaderThread(ffmpegProcess.getErrorStream(), new StreamReaderThread.StreamListener() {
 					@Override
-					public void onLineRead(String line) {
+					public void onLineRead(StreamReaderThread streamReader, String line) {
+						Logger.debug("FFMPEG OUTPUT [%s] | %s", streamReader.getIncrementedId(), line);
+						
 						if (callback != null) {
 							long processed = 0;
 							
@@ -159,12 +175,42 @@ public class VideoDownloadWorker extends WorkerThread {
 					
 					@Override
 					public void onException(Exception exception) {
-						exception.printStackTrace();
+						Logger.exception(exception, "Failed to read ffmpeg output.");
 					}
 				});
 				
-				streamReader.start();
-				streamReader.join();
+				new StreamReaderThread(ffmpegProcess.getInputStream(), new StreamReaderThread.StreamListener() {
+					@Override
+					public void onLineRead(StreamReaderThread streamReader, String line) {
+						Logger.debug("FFMPEG XX-OUTPUT [%s] | %s", streamReader.getIncrementedId(), line);
+						
+						if (callback != null) {
+							long processed = 0;
+							
+							Matcher matcher = processedSizePattern.matcher(line);
+							if (matcher.find()) { /* Exemple: size= 768kB time=00:00:57.62 bitrate= 109.2kbits/s speed=8.39x */
+								processed = Long.parseLong(matcher.group(1));
+								
+								callback.onVideoConversionProgressUpdate(item, MathUtils.pourcent(processed * 1000, fileSize));
+							}
+						}
+					}
+					
+					@Override
+					public void onException(Exception exception) {
+						Logger.exception(exception, "Failed to read ffmpeg output.");
+					}
+				}).start();
+				
+				outputStreamReader.start();
+				
+				long startTime = System.currentTimeMillis();
+				outputStreamReader.join(FFMPEG_THREAD_TIMEOUT);
+				long totalTime = System.currentTimeMillis() - startTime;
+				
+				if (totalTime >= FFMPEG_THREAD_TIMEOUT) {
+					throw new FFmpegTimeoutException();
+				}
 				
 				if (callback != null) {
 					callback.onVideoConversionProgressUpdate(item, 100);
@@ -192,6 +238,10 @@ public class VideoDownloadWorker extends WorkerThread {
 		if (callback != null) {
 			callback.onFinished();
 		}
+	}
+	
+	public static File createTargetVideoFile(String videoTitle) {
+		return new File(VideoManager.DOWNLOAD_DIRECTORY, FileUtils.replaceIllegalChar(videoTitle) + ".mp3");
 	}
 	
 	/**

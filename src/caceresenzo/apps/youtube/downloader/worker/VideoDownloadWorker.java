@@ -21,6 +21,7 @@ import caceresenzo.libs.math.MathUtils;
 import caceresenzo.libs.network.Downloader;
 import caceresenzo.libs.thread.implementations.WorkerThread;
 import caceresenzo.libs.youtube.extractor.YouTubeExtractor;
+import caceresenzo.libs.youtube.format.AudioCodec;
 import caceresenzo.libs.youtube.format.VideoCodec;
 import caceresenzo.libs.youtube.format.YoutubeFormat;
 import caceresenzo.libs.youtube.playlist.YoutubePlaylistItem;
@@ -89,7 +90,25 @@ public class VideoDownloadWorker extends WorkerThread {
 						for (YoutubeVideo video : youtubeFiles.values()) {
 							YoutubeFormat format = video.getFormat();
 							
-							if (format.getVideoCodec().equals(VideoCodec.NONE)) {
+							if (format.getVideoCodec().equals(VideoCodec.NONE) && !format.getAudioCodec().equals(AudioCodec.NONE)) {
+								if (highestAudioVideo != null) {
+									if (highestAudioVideo.getFormat().getAudioBitrate() < format.getAudioBitrate()) {
+										highestAudioVideo = video;
+									}
+								} else {
+									highestAudioVideo = video;
+								}
+							}
+						}
+						
+						if (highestAudioVideo == null) {
+							for (YoutubeVideo video : youtubeFiles.values()) {
+								YoutubeFormat format = video.getFormat();
+								
+								if (format.getAudioCodec().equals(AudioCodec.NONE)) {
+									continue;
+								}
+								
 								if (highestAudioVideo != null) {
 									if (highestAudioVideo.getFormat().getAudioBitrate() < format.getAudioBitrate()) {
 										highestAudioVideo = video;
